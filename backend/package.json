@@ -1,6 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Implementing mini admin panel for user management system",
   "main": "app.js",
   "scripts": {
