@@ -15,6 +15,6 @@ message User {
 }
 
 // Storing user messages in Users
-message Users {
+message UserList {
     repeated User users = 1;
 }
