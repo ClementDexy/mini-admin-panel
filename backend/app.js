@@ -46,8 +46,21 @@ app.get('/api/users', (req, res) => {
     }
 });
 
-// GET /api/users/stats/7d-users - Fetch users created in the last 7 days
-app.get('/api/users/stats/7d-users', (req, res) => {
+// GET /api/users/count - Get user counts
+app.get('/api/users/count', (req, res) => {
+    try {
+        const total = userStatements.countUsers.get().count;
+        const byRole = userStatements.countUsersByRole.all();
+        const byStatus = userStatements.countUsersByStatus.all();
+
+        res.json({ total, byRole, byStatus });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user count', error: error.message });
+    }
+});
+
+// GET /api/users/stats - Fetch users created in the last 7 days
+app.get('/api/users/stats', (req, res) => {
     try {
         // Last 7 days in milliseconds
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -78,27 +91,49 @@ app.get('/api/users/:id', (req, res) => {
 // POST /api/users - Create a new user
 app.post('/api/users', (req, res) => {
     try {
-        const { email, role, status } = req.body;
-        if (!email || !role || !status) {
-            return res.status(400).json({ error: 'Email, role, and status are required' });
+        const { email, role = 'user', status = 'active' } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'Email required, your role is set to user and status is set to active' });
         }
+
+        const existingUser = userStatements.getUserByEmail.get(email);
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+        // Validate user input
+        const errors = validateUserInput({ email, role, status });
+        if (errors.length > 0) {
+            return res.status(400).json({ error: errors.join(', ') });
+        }
+
+        // Generate the cryptographic data and timestamps
         const emailHash = cryptoService.hashEmail(email);
         const signature = cryptoService.signEmailHash(emailHash);
         const createdAt = Date.now();
 
+        // Insert the new user into the database
         const result = userStatements.insertUser.run(email, emailHash, role, status, createdAt, signature);
+
+        if (!result || !result.lastInsertRowid) {
+            throw new Error('Failed to insert user');
+        }
+
+        // Fetch and return the newly created user
         const newUser = userStatements.selectUserById.get(result.lastInsertRowid);
         res.status(201).json(convertToJSON(newUser));
+
     } catch (error) {
         res.status(500).json({ error: 'Failed to create user', error: error.message });
     }
 });
 
-// Protobuf export of all users
+// GET /api/users/export - Protobuf export of all users
 app.get('/api/users/export', (req, res) => {
     try {
         const users = userStatements.selectAllUsers.all();
         const buffer = encodeUserList(users);
+
+        // Set the appropriate headers for Protobuf
         res.setHeader('Content-Type', 'application/x-protobuf');
         res.setHeader('Content-Disposition', 'attachment; filename=users.db');
         res.send(buffer);
@@ -133,15 +168,22 @@ app.put('/api/users/:id', (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const emailHash = cryptoService.hashEmail(email);
-        const signature = cryptoService.signEmailHash(emailHash);
+        let emailHash = existingUser.email_hash;
+        let signature = existingUser.signature;
+        let updatedEmail = email || existingUser.email;
+        
 
         // if email is changed, re-sign the hash
         if (email && email !== existingUser.email) {
+            const userEmail = userStatements.getUserByEmail.get(email);
+            if (userEmail && userEmail.id !== parseInt(id)) {
+                return res.status(400).json({ error: 'Email already exists' });
+            }
+            emailHash = cryptoService.hashEmail(email);
             signature = cryptoService.signEmailHash(emailHash);
         }
 
-        userStatements.updateUser.run(email, emailHash, role, status, signature, id);
+        userStatements.updateUser.run(updatedEmail, emailHash, role, status, signature, parseInt(id));
         const updatedUser = userStatements.selectUserById.get(parseInt(id));
         res.json(convertToJSON(updatedUser));
     } catch (error) {
@@ -156,28 +198,18 @@ app.delete('/api/users/:id', (req, res) => {
         if (!id || isNaN(parseInt(id))) {
             return res.status(400).json({ error: 'Invalid user ID' });
         }
+
+        // Check if user exists
         const existingUser = userStatements.selectUserById.get(parseInt(id));
         if (!existingUser) {
             return res.status(404).json({ error: 'User not found' });
         }
+
+        // Delete the user
         userStatements.deleteUser.run(parseInt(id));
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete user', error: error.message });
-    }
-});
-
-// GET /users/export - Export users in protobuf format
-
-app.get('/api/users/export', (req, res) => {
-    try {
-        const users = userStatements.selectAllUsers.all();
-        const buffer = encodeUserList(users);
-        res.setHeader('Content-Type', 'application/x-protobuf');
-        res.setHeader('Content-Disposition', 'attachment; filename=users.db');
-        res.send(buffer);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to export users', error: error.message });
     }
 });
 
@@ -196,9 +228,12 @@ app.get('/api/health', (req, res) => {
     try {
         // Test database connection
         userStatements.countUsers.get();
-        res.json({ status: 'OK',
+        res.json({ 
+            status: 'OK',
             database: 'connected',
-            timestamp: new Date().toISOString() });
+            timestamp: new Date().toISOString(),
+            server_time: Date.now()
+         });
     } catch (error) {
         res.status(500).json({ 
             status: 'ERROR',

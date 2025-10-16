@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { count } from 'console';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -48,6 +49,10 @@ export const userStatements = {
     SELECT * FROM users WHERE id = ?
   `),
 
+  getUserByEmail: db.prepare(`
+    SELECT * FROM users WHERE email = ?
+  `),
+
   selectStats: db.prepare(`
     SELECT
     date(created_at / 1000, 'unixepoch') AS date,
@@ -57,9 +62,21 @@ export const userStatements = {
     GROUP BY date
     ORDER BY date
   `),
-  
+
   countUsers: db.prepare(`
     SELECT COUNT(*) AS count FROM users
+  `),
+
+  countUsersByRole: db.prepare(`
+    SELECT role, COUNT(*) AS count 
+    FROM users 
+    GROUP BY role
+  `),
+
+  countUsersByStatus: db.prepare(`
+    SELECT status, COUNT(*) AS count 
+    FROM users 
+    GROUP BY status
   `),
 
   deleteUserById: db.prepare(`
