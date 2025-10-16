@@ -57,6 +57,10 @@ export const userStatements = {
     GROUP BY date
     ORDER BY date
   `),
+  
+  countUsers: db.prepare(`
+    SELECT COUNT(*) AS count FROM users
+  `),
 
   deleteUserById: db.prepare(`
     DELETE FROM users WHERE id = ?
