@@ -1,2 +1,40 @@
-node_modules
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data.sqlite
+
+# Private Keys
+*.pem
+*.key
+*.pub
+private-*
+*.priv
+
+# Environment variables
 .env
+.env.local
+.env.production
+.env.development
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Dependencies
+node_modules/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.swp*
