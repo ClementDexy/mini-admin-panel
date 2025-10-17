@@ -71,8 +71,8 @@ app.get('/api/users/stats', (req, res) => {
     }
 });
 
-// GET /api/users/:id - Get user by ID
-app.get('/api/users/:id', (req, res) => {
+// GET /api/user/:id - Get user by ID
+app.get('/api/user/:id', (req, res) => {
     try {
         const { id } = req.params;
         if (!id || isNaN(parseInt(id))) {

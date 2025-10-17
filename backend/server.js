@@ -3,13 +3,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log('Available endpoints:');
     console.log('  GET  /api/users          - Get all users');
-    console.log('  GET  /api/users/:id      - Get user by ID');
+    console.log('  GET  /api/user/:id      - Get user by ID');
     console.log('  POST /api/users          - Create new user');
     console.log('  PUT  /api/users/:id      - Update user');
     console.log('  DELETE /api/users/:id    - Delete user');
