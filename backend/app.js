@@ -59,55 +59,6 @@ app.get('/api/users/count', (req, res) => {
     }
 });
 
-// GET /api/users/created7days - returns [{ date: "YYYY-MM-DD", count: N }, ...] for last 7 days
-app.get('/api/users/created7days', (req, res) => {
-  try {
-    const days = 7;
-    const today = new Date();
-    const dates = [];
-    const counts = {};
-
-    // Build last `days` dates (YYYY-MM-DD) and initialize counts
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const isoDate = d.toISOString().slice(0, 10);
-      dates.push(isoDate);
-      counts[isoDate] = 0;
-    }
-
-    // Calculate the start timestamp (7 days ago at 00:00:00)
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - (days - 1));
-    startDate.setHours(0, 0, 0, 0);
-    const startTimestamp = startDate.getTime(); // Convert to milliseconds
-
-    // Fetch rows created since startTimestamp
-    // created_at is stored as milliseconds (Unix timestamp)
-    const rows = userStatements.selectStats.all(startTimestamp);
-
-    // Count by day
-    rows.forEach(row => {
-      if (!row || !row.created_at) return;
-      
-      // Convert milliseconds to Date object
-      const createdDate = new Date(row.created_at);
-      const day = createdDate.toISOString().slice(0, 10);
-      
-      if (Object.prototype.hasOwnProperty.call(counts, day)) {
-        counts[day] += 1;
-      }
-    });
-
-    const result = dates.map(d => ({ date: d, count: counts[d] || 0 }));
-    
-    console.log('Final result:', result);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to compute users created per day' });
-  }
-});
-
 // GET /api/user/:id - Get user by ID
 app.get('/api/user/:id', (req, res) => {
     try {

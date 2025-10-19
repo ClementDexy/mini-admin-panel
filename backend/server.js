@@ -13,7 +13,6 @@ app.listen(PORT, () => {
     console.log('  POST /api/users              - Create new user');
     console.log('  PUT  /api/users/:id          - Update user');
     console.log('  DELETE /api/users/:id        - Delete user');
-    console.log('  GET  /api/users/created7days - Get created user statistics in 7 days');
     console.log('  GET  /api/users/count        - Get user counts');
     console.log('  GET  /api/users/export       - Export users (protobuf)');
     console.log('  GET  /api/public-key         - Get public key');

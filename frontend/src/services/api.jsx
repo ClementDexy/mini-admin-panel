@@ -61,13 +61,4 @@ export const api = {
     }
     return true;
   },
-
- getUsersCreatedPerDay: async (days = 7) => {
-    const res = await fetch(`${API_BASE_URL}/users/created7days`);
-    if (!res.ok) {
-      const errText = await res.text().catch(() => res.statusText);
-      throw new Error(`Failed to fetch users created per day: ${errText}`);
-    }
-    return res.json();
-  },
 }
