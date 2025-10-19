@@ -2,6 +2,7 @@ import protobuf from 'protobufjs';
 import { CryptoService } from './cryptoService';
 
 export class ProtobufService {
+    // Reference: https://protobufjs.github.io/protobuf.js/manual.html#loading
     static async loadUserProto() {
         try {
             const baseUrl =
@@ -24,6 +25,10 @@ export class ProtobufService {
         }
     }
 
+    // Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+
+    /* Convert various data types to a Uint8Array and used for protobuf encoding
+    and consistency */
     static toUint8(data) {
         try {
             if (!data) return new Uint8Array();
@@ -43,6 +48,8 @@ export class ProtobufService {
             return new Uint8Array();
         }
     }
+
+    // Reference: https://protobufjs.github.io/protobuf.js/manual.html#decoding
 
     static async decodeUserList(buffer) {
         try {
@@ -91,7 +98,7 @@ export class ProtobufService {
             throw new Error(`Failed to decode protobuf data: ${error.message}`);
         }
     }
-
+// Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
     static async verifyUsers(users, publicKeyPem) {
         if (!publicKeyPem) throw new Error('Missing public key for verification.');
 

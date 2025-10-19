@@ -17,7 +17,7 @@ export const formatDate = (timestamp) => {
     return new Date(ms).toLocaleString();
   };
 
-
+//   Format user role and status for display
 export const formatRole = (role) => {
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 }

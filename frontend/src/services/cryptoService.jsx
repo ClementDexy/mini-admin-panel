@@ -1,5 +1,6 @@
 export class CryptoService {
 
+  // Convert various data types to a Uint8Array for cryptographic operations
   static toUint8(input) {
     if (!input) return new Uint8Array();
     if (input instanceof Uint8Array) return input;
@@ -18,7 +19,8 @@ export class CryptoService {
       return new Uint8Array();
     }
   }
-
+  // Import RSA public key from PEM format
+  // Reference: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey
   static async importRsaPublicKey(pem) {
     try {
       const base64 = pem
@@ -36,7 +38,7 @@ export class CryptoService {
       throw new Error('Invalid or corrupted public key.');
     }
   }
-
+  // Verify signature using the imported public key
   static async verifySignature(publicKey, data, signature) {
     const bytesData = this.toUint8(data);
     const bytesSig = this.toUint8(signature);
@@ -52,7 +54,7 @@ export class CryptoService {
       bytesData
     );
   }
-
+  // Verify a single user's email hash signature
   static async verifyUser(user, pemPublicKey) {
     if (!pemPublicKey) throw new Error('Public key is required for verification.');
 

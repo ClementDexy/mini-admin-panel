@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
+// Reference: https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypairsync_type_options
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,7 @@ export class CryptoService {
     }
 
     // Ensure the keys directory and key files exist, generate if they don't
+    // Uses synchronous file operations for simplicity during initialization
     ensureKeysExist() {
         if (!fs.existsSync(KEY_DIR)) {
             fs.mkdirSync(KEY_DIR);
