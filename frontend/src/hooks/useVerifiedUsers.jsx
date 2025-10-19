@@ -7,6 +7,7 @@ export const useVerifiedUsers = () => {
     const [publicKey, setPublicKey] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [stats, setStats] = useState([]);
     const mountedRef = useRef(true);
 
     useEffect(() => {
@@ -30,7 +31,6 @@ export const useVerifiedUsers = () => {
 
                 //  Verified users loaded successfully.
                 setUsers(verified);
-                
 
             } catch (error) {
                 setError(error.message);
@@ -61,6 +61,7 @@ export const useVerifiedUsers = () => {
             const verifiedUsers = await ProtobufService.verifyUsers(decodedUsers, key);
             if (!mountedRef.current) return;
             setUsers(verifiedUsers);
+
         } catch (error) {
             console.error('Failed to refresh users:', error);
             setError(error?.message ?? String(error));
