@@ -54,13 +54,7 @@ export const userStatements = {
   `),
 
   selectStats: db.prepare(`
-    SELECT
-    date(created_at / 1000, 'unixepoch') AS date,
-    COUNT(*) AS count 
-    FROM users 
-    WHERE created_at >= ? 
-    GROUP BY date
-    ORDER BY date
+    SELECT created_at FROM users WHERE created_at >= ? ORDER BY created_at DESC
   `),
 
   countUsers: db.prepare(`

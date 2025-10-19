@@ -8,6 +8,16 @@ export const formatDate = (timestamp) => {
     });
 }
 
+  export const formatCreatedAt = (u) => {
+    const raw = u.createdAt ?? u.created_at ?? null;
+    if (!raw) return '-';
+    // ensure numeric ms
+    const ms = typeof raw === 'number' ? raw : (typeof raw === 'string' && /^[0-9]+$/.test(raw) ? Number(raw) : Date.parse(raw));
+    if (!ms || isNaN(ms)) return '-';
+    return new Date(ms).toLocaleString();
+  };
+
+
 export const formatRole = (role) => {
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 }

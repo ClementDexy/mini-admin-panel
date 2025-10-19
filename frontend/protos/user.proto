@@ -14,7 +14,7 @@ message User {
     bytes signature = 7;
 }
 
-// Storing user messages in UserList
+// Storing user messages in Users
 message UserList {
     repeated User users = 1;
 }
