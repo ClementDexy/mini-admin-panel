@@ -1,6 +1,6 @@
 import React from 'react';
 import { api } from '../services/api';
-import { formatCreatedAt, formatRole, formatStatus, truncateHash } from '../utils/formatters';
+import { formatCreatedAt, formatRole, truncateHash } from '../utils/formatters';
 
 export default function UsersTable({ users = [], loading, onEdit, onRefresh }) {
   const handleDelete = async (user) => {
@@ -12,6 +12,33 @@ export default function UsersTable({ users = [], loading, onEdit, onRefresh }) {
       console.error(err);
       alert('Failed to delete user');
     }
+  };
+
+  // Status badge component
+  const StatusBadge = ({ status }) => {
+    const isActive = status === 'active';
+    return (
+      <span className={`badge ${isActive ? 'bg-success' : 'bg-secondary'}`}>
+        {isActive ? 'Active' : 'Inactive'}
+      </span>
+    );
+  };
+
+  // Role badge component
+  const RoleBadge = ({ role }) => {
+    const roleConfig = {
+      admin: { class: 'bg-danger', label: 'Admin' },
+      moderator: { class: 'bg-warning text-dark', label: 'Moderator' },
+      user: { class: 'bg-info', label: 'User' }
+    };
+    
+    const config = roleConfig[role] || { class: 'bg-secondary', label: formatRole(role) };
+    
+    return (
+      <span className={`badge ${config.class}`}>
+        {config.label}
+      </span>
+    );
   };
 
   return (
@@ -29,21 +56,63 @@ export default function UsersTable({ users = [], loading, onEdit, onRefresh }) {
         </thead>
         <tbody>
           {loading && (
-            <tr><td colSpan="6" className="text-center py-4">Loading...</td></tr>
+            <tr>
+              <td colSpan="6" className="text-center py-4">
+                <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+                Loading users...
+              </td>
+            </tr>
           )}
           {!loading && users.length === 0 && (
-            <tr><td colSpan="6" className="text-center py-4">No users found</td></tr>
+            <tr>
+              <td colSpan="6" className="text-center py-4 text-muted">
+                No verified users found
+              </td>
+            </tr>
           )}
           {users.map(u => (
             <tr key={u.id}>
-              <td>{u.id}</td>
-              <td>{u.email}</td>
-              <td>{formatRole(u.role)}</td>
-              <td>{formatStatus(u.status)}</td>
-              <td>{formatCreatedAt(u)}</td>
+              <td>
+                <code className="text-muted">{u.id}</code>
+              </td>
+              <td>
+                <div>
+                  <strong>{u.email}</strong>
+                  {u.emailHash && (
+                    <div className="text-muted small">
+                      Hash: {truncateHash(u.emailHash)}
+                    </div>
+                  )}
+                </div>
+              </td>
+              <td>
+                <RoleBadge role={u.role} />
+              </td>
+              <td>
+                <StatusBadge status={u.status} />
+              </td>
+              <td>
+                <small className="text-muted">
+                  {formatCreatedAt(u)}
+                </small>
+              </td>
               <td className="text-end">
-                <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit(u)}>Edit</button>
-                <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(u)}>Delete</button>
+                <div className="btn-group btn-group-sm">
+                  <button 
+                    className="btn btn-outline-primary" 
+                    onClick={() => onEdit(u)}
+                    title="Edit user"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className="btn btn-outline-danger" 
+                    onClick={() => handleDelete(u)}
+                    title="Delete user"
+                  >
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

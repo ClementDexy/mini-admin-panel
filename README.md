@@ -74,7 +74,6 @@ Frontend runs at **http://localhost:3000**
 | POST | /api/users | Create new user |
 | PUT | /api/users/:id | Update user |
 | DELETE | /api/users/:id | Delete user |
-| GET | /api/users/created7days | User creation stats (7 days) |
 
 ### Protobuf & System
 | Method | Endpoint | Description |
@@ -162,7 +161,7 @@ message UserList {
 ## 🧪 Development Notes
 
 ### File Generation
-- **Database:** auto-created  
+- **Database (users.db):** auto-created  
 - **RSA Keys:** auto-generated on first start  
 - **Protobuf Files:** shared between backend and frontend  
 

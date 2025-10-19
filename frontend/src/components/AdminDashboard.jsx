@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useState } from 'react';
 import { useVerifiedUsers } from '../hooks/useVerifiedUsers';
 import UsersTable from './UsersTable';
@@ -41,19 +40,69 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {/* Error Alert Component */}
+      <ErrorAlert 
+        error={error} 
+        onRetry={refreshUsers} 
+        retryLabel="Retry Loading"
+      />
 
-      {showChart && (
-        <div className="mb-3">
-          <UsersChart users={users} days={7} />
+      {/* Loading Spinner for initial load */}
+      {loading && users.length === 0 && (
+        <LoadingSpinner 
+          message="Loading and verifying users from protobuf export..."
+        />
+      )}
+
+{(!loading || users.length > 0) && (
+        <>
+          {showChart && (
+            <div className="mb-3">
+              <UsersChart users={users} days={7} />
+            </div>
+          )}
+
+          <div className="card">
+            <div className="card-body">
+              {loading && users.length > 0 ? (
+                <div className="text-center py-3">
+                  <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+                  <span className="text-muted">Updating users...</span>
+                </div>
+              ) : (
+                <UsersTable 
+                  users={users} 
+                  loading={loading} 
+                  onEdit={openEdit} 
+                  onRefresh={refreshUsers} 
+                />
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Empty state when no users but not loading */}
+      {!loading && users.length === 0 && !error && (
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <div className="text-muted mb-3">
+              <i className="bi bi-people fs-1"></i>
+            </div>
+            <h5 className="text-muted">No Verified Users Found</h5>
+            <p className="text-muted">
+              No cryptographically verified users were found in the protobuf export.
+            </p>
+            <button 
+              className="btn btn-primary" 
+              onClick={refreshUsers}
+            >
+              Check Again
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="card">
-        <div className="card-body">
-          <UsersTable users={users} loading={loading} onEdit={openEdit} onRefresh={refreshUsers} />
-        </div>
-      </div>
 
       <UserFormModal
         show={showModal}
