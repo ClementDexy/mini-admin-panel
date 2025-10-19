@@ -7,7 +7,7 @@ import rateLimit from 'express-rate-limit';
 
 import db, { userStatements } from './config/db.js';
 import { CryptoService } from './services/CryptoService.js';
-import { loadUserProtoSchema, encodeUserList, decodeUserList } from './services/protoService.js';
+import { loadUserProtoSchema, encodeUserList } from './services/protoService.js';
 import { convertToJSON } from './utils/convertToJSON.js';
 import { validateUserInput } from './utils/validateUserInput.js';
 

@@ -16,6 +16,7 @@ export const loadUserProtoSchema = async () => {
 }
 
 // Arrow Function to encode user data into protobuf binary format
+// Reference: https://protobufjs.github.io/protobuf.js/manual.html#encoding
 export const encodeUserList = (users) => {
   if (!UserList) throw new Error('UserList proto not loaded (call loadUserProtoSchema first)');
 
@@ -79,37 +80,5 @@ export const encodeUserList = (users) => {
   const encoded = UserList.encode(message).finish();
 
   return encoded;
-};
-
-// Arrow Function to decode protobuf binary data back into user objects
-// For only Testing on the backend
-export const decodeUserList = (buffer) => {
-  if (!UserList) throw new Error('UserList proto not loaded (call loadUserProtoSchema first)');
-  // Accept Buffer / Uint8Array / ArrayBuffer
-  let uint8;
-  if (Buffer.isBuffer(buffer)) uint8 = new Uint8Array(buffer);
-  else if (buffer instanceof ArrayBuffer) uint8 = new Uint8Array(buffer);
-  else if (buffer instanceof Uint8Array) uint8 = buffer;
-  else uint8 = new Uint8Array(buffer);
-
-  const decoded = UserList.decode(uint8);
-  return (decoded.users || []).map(u => {
-    // normalize byte fields from either camelCase (emailHash) or snake_case (email_hash)
-    const rawEmailHash = u.emailHash ?? u.email_hash ?? u.emailHashBytes ?? [];
-    const rawSignature = u.signature ?? u.sig ?? [];
-    const emailHashBuf = Buffer.isBuffer(rawEmailHash) ? rawEmailHash : Buffer.from(rawEmailHash || []);
-    const sigBuf = Buffer.isBuffer(rawSignature) ? rawSignature : Buffer.from(rawSignature || []);
-
-    return {
-      id: u.id,
-      email: u.email,
-      email_hash: emailHashBuf,
-      signature: sigBuf,
-      role: u.role,
-      status: u.status,
-      created_at: (typeof u.created_at === 'string' && u.created_at) ? Date.parse(u.created_at) : (typeof u.created_at === 'number' ? u.created_at : Date.now()),
-
-    };
-  });
 };
 
